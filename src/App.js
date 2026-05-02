@@ -299,7 +299,8 @@ const handleImageUpload = async (e) => {
               <textarea style={{ ...styles.input, minHeight: 80, resize: "none", marginBottom: 10 }}
                 placeholder={postType === "post" ? "Montre ton travail..." : "Décris la mission..."}
                 value={newPost} onChange={e => setNewPost(e.target.value)} />
-              {postImages.length > 0 && (
+              <p style={{ margin: "0 0 12px", fontSize: 14, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{post.content}</p>
+{postImages.length > 0 && (
   <div style={{ display: "grid", gridTemplateColumns: postImages.length === 1 ? "1fr" : "1fr 1fr", gap: 6, marginBottom: 10 }}>
     {postImages.map((img, i) => (
       <div key={i} style={{ position: "relative" }}>
