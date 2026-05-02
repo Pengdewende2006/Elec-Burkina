@@ -333,7 +333,13 @@ const handleImageUpload = async (e) => {
                     </div>
                     {post.type === "mission" && <span style={{ background: "#ef444420", color: COLORS.red, borderRadius: 8, padding: "3px 8px", fontSize: 11, fontWeight: 700 }}>🚨 MISSION</span>}
                   </div>
-                  <p style={{ margin: "0 0 12px", fontSize: 14, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{post.content}</p>
+                  {post.images?.length > 0 && (
+  <div style={{ display: "grid", gridTemplateColumns: post.images.length === 1 ? "1fr" : "1fr 1fr", gap: 4, marginBottom: 12, borderRadius: 12, overflow: "hidden" }}>
+    {post.images.map((img, i) => (
+      <img key={i} src={img} alt="" style={{ width: "100%", height: post.images.length === 1 ? 220 : 130, objectFit: "cover", cursor: "pointer", display: "block" }} onClick={() => setLightbox(img)} />
+    ))}
+  </div>
+)}
                   <div style={{ display: "flex", gap: 16, borderTop: `1px solid ${COLORS.cardBorder}`, paddingTop: 10 }}>
                     <button style={{ background: "none", border: "none", color: liked ? COLORS.accent : COLORS.muted, fontFamily: FONT, fontSize: 13, cursor: "pointer" }} onClick={() => toggleLike(post.id, post.likes || [])}>
                       ⚡ {(post.likes || []).length}
