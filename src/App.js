@@ -258,6 +258,12 @@ const handleImageUpload = async (e) => {
     />
   );
 
+if (lightbox) return (
+  <div style={{ position: "fixed", inset: 0, background: "#000000ee", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setLightbox(null)}>
+    <img src={lightbox} alt="" style={{ maxWidth: "95vw", maxHeight: "90vh", borderRadius: 12, objectFit: "contain" }} />
+    <div style={{ position: "absolute", top: 20, right: 20, color: "#fff", fontSize: 28, cursor: "pointer" }}>✕</div>
+  </div>
+);
   if (!profile.approved) return (
     <div style={{ ...styles.app, display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", padding: 24 }}>
       <div style={{ textAlign: "center" }}>
