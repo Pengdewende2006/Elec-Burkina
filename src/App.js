@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { auth, provider, db } from "./firebase";
 import {
   signInWithEmailAndPassword,
@@ -53,6 +53,9 @@ export default function App() {
   const [notification, setNotification] = useState(null);
   const [viewProfile, setViewProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [postImages, setPostImages] = useState([]);
+const [uploading, setUploading] = useState(false);
+const fileRef = useRef();
 
  const uploadImage = async (file) => {
   const formData = new FormData();
