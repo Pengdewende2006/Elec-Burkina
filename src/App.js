@@ -297,7 +297,25 @@ const handleImageUpload = async (e) => {
               <textarea style={{ ...styles.input, minHeight: 80, resize: "none", marginBottom: 10 }}
                 placeholder={postType === "post" ? "Montre ton travail..." : "Décris la mission..."}
                 value={newPost} onChange={e => setNewPost(e.target.value)} />
-              <button style={{ ...styles.btn, width: "100%" }} onClick={submitPost}>Publier</button>
+              {postImages.length > 0 && (
+  <div style={{ display: "grid", gridTemplateColumns: postImages.length === 1 ? "1fr" : "1fr 1fr", gap: 6, marginBottom: 10 }}>
+    {postImages.map((img, i) => (
+      <div key={i} style={{ position: "relative" }}>
+        <img src={img} alt="" style={{ width: "100%", height: postImages.length === 1 ? 200 : 120, objectFit: "cover", borderRadius: 10 }} />
+        <div style={{ position: "absolute", top: 6, right: 6, background: "#000000aa", color: "#fff", borderRadius: "50%", width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12 }} onClick={() => setPostImages(prev => prev.filter((_, j) => j !== i))}>✕</div>
+      </div>
+    ))}
+  </div>
+)}
+<input ref={fileRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={handleImageUpload} />
+<div style={{ display: "flex", gap: 8 }}>
+  <button style={{ ...styles.btnOutline, flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }} onClick={() => fileRef.current.click()}>
+    {uploading ? "⏳ Envoi..." : `📷 ${postImages.length > 0 ? postImages.length + " photo(s)" : "Ajouter photos"}`}
+  </button>
+  <button style={{ ...styles.btn, flex: 1 }} onClick={submitPost} disabled={uploading}>
+    {uploading ? "⏳" : "Publier"}
+  </button>
+</div>
             </div>
             {posts.map(post => {
               const author = users.find(u => u.id === post.userId);
