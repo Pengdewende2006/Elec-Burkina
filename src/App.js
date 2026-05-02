@@ -54,6 +54,32 @@ export default function App() {
   const [viewProfile, setViewProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
+ const uploadImage = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+  formData.append("cloud_name", CLOUDINARY_CLOUD);
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`,
+    { method: "POST", body: formData }
+  );
+  const data = await res.json();
+  return data.secure_url;
+};
+
+const handleImageUpload = async (e) => {
+  const files = Array.from(e.target.files);
+  if (postImages.length + files.length > 4) {
+    showNotif("Maximum 4 photos", "error");
+    return;
+  }
+  setUploading(true);
+  for (const file of files) {
+    const url = await uploadImage(file);
+    setPostImages(prev => [...prev, url]);
+  }
+  setUploading(false);
+};
   const showNotif = (msg, type = "success") => {
     setNotification({ msg, type });
     setTimeout(() => setNotification(null), 3000);
