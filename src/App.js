@@ -197,6 +197,16 @@ export default function App() {
     showNotif("Publication ajoutée !");
   };
 
+  const [commentInputs, setCommentInputs] = useState({});
+
+const submitComment = async (postId) => {
+  const text = commentInputs[postId];
+  if (!text?.trim()) return;
+  const post = posts.find(p => p.id === postId);
+  const newComments = [...(post.comments || []), { userId: user.uid, text }];
+  await updateDoc(doc(db, "posts", postId), { comments: newComments });
+  setCommentInputs({ ...commentInputs, [postId]: "" });
+};
   const toggleLike = async (postId, likes) => {
     const liked = likes.includes(user.uid);
     await updateDoc(doc(db, "posts", postId), {
@@ -350,8 +360,18 @@ export default function App() {
                       ⚡ {(post.likes || []).length}
                     </button>
                     <button style={{ background: "none", border: "none", color: COLORS.muted, fontFamily: FONT, fontSize: 13, cursor: "pointer" }}>
-                      💬 {(post.comments || []).length}
-                    </button>
+  💬 {(post.comments || []).length}
+</button>
+</div>
+{(post.comments || []).map((c, i) => (
+  <div key={i} style={{ background: "#1e2d4560", borderRadius: 10, padding: "8px 12px", marginTop: 8, fontSize: 13 }}>
+    <span style={{ fontWeight: 700, color: COLORS.accent }}>{users.find(u => u.id === c.userId)?.name} </span>
+    <span>{c.text}</span>
+  </div>
+))}
+<div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+  <input style={{ ...S.input, flex: 1, padding: "8px 12px", fontSize: 13 }} placeholder="Commenter..." value={commentInputs[post.id] || ""} onChange={e => setCommentInputs({ ...commentInputs, [post.id]: e.target.value })} onKeyDown={e => e.key === "Enter" && submitComment(post.id)} />
+  <button style={{ ...S.btn, padding: "8px 12px", fontSize: 12 }} onClick={() => submitComment(post.id)}>→</button>
                   </div>
                 </div>
               );
