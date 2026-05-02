@@ -22,7 +22,7 @@ export const messaging = getMessaging(app);
 export const requestNotificationPermission = async () => {
   try {
     const token = await getToken(messaging, {
-      vapidKey: "VAPID_KEY_ICI"
+      vapidKey: "BHmmcaNGyuYMzpIh8p-fYhRd5Arn9c3ECzDdgyvFyiLh5GyygE1JBbfeSCVUIVhCkjN2BF-nedA2PfTU5m3ypqM"
     });
     if (token) {
       console.log("Token notification:", token);
