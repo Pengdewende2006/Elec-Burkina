@@ -35,6 +35,8 @@ const COLORS = {
 
 const FONT = "'Sora', sans-serif";
 const ADMIN_EMAIL = "emailnabonswendepourde@gmail.com";
+const CLOUDINARY_CLOUD = "doqq7quf4";
+const CLOUDINARY_UPLOAD_PRESET = "elec_burkina";
 export default function App() {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
