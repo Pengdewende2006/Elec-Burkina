@@ -54,6 +54,7 @@ export default function App() {
   const [viewProfile, setViewProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [postImages, setPostImages] = useState([]);
+  const [lightbox, setLightbox] = useState(null);
 const [uploading, setUploading] = useState(false);
 const fileRef = useRef();
 
