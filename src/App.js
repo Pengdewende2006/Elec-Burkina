@@ -181,16 +181,18 @@ const handleImageUpload = async (e) => {
   };
 
   const submitPost = async () => {
-    if (!newPost.trim()) return;
+    if (!newPost.trim() && postImages.length === 0) return;
     await addDoc(collection(db, "posts"), {
       userId: user.uid,
       content: newPost,
+      images: postImages,
       likes: [],
       comments: [],
       type: postType,
       createdAt: serverTimestamp()
     });
     setNewPost("");
+    setPostImages([]);
     showNotif("Publication ajoutée !");
   };
 
