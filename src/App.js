@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { auth, provider, db } from "./firebase";
+import { auth, provider, db, requestNotificationPermission } from "./firebase";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -55,11 +55,32 @@ export default function App() {
   const [viewProfile, setViewProfile] = useState(null);
   const [lightbox, setLightbox] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [commentInputs, setCommentInputs] = useState({});
   const fileRef = useRef();
 
   const showNotif = (msg, type = "success") => {
     setNotification({ msg, type });
     setTimeout(() => setNotification(null), 3000);
+  };
+
+  const initPushNotifications = async (uid) => {
+    try {
+      const { Capacitor } = await import("@capacitor/core");
+      if (!Capacitor.isNativePlatform()) return;
+      const { PushNotifications } = await import("@capacitor/push-notifications");
+      const permission = await PushNotifications.requestPermissions();
+      if (permission.receive === "granted") {
+        await PushNotifications.register();
+      }
+      PushNotifications.addListener("registration", async (token) => {
+        await updateDoc(doc(db, "users", uid), { fcmToken: token.value });
+      });
+      PushNotifications.addListener("pushNotificationReceived", (notif) => {
+        showNotif(notif.title + " : " + notif.body);
+      });
+    } catch (e) {
+      console.log("Push error:", e);
+    }
   };
 
   const uploadImage = async (file) => {
@@ -97,6 +118,7 @@ export default function App() {
         if (snap.exists()) {
           setProfile(snap.data());
           requestNotificationPermission(u.uid);
+          initPushNotifications(u.uid);
         }
       } else {
         setUser(null);
@@ -106,6 +128,7 @@ export default function App() {
     });
     return () => unsub();
   }, []);
+
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "users"), (snap) => {
       setUsers(snap.docs.map(d => ({ id: d.id, ...d.data() })));
@@ -199,21 +222,20 @@ export default function App() {
     showNotif("Publication ajoutée !");
   };
 
-  const [commentInputs, setCommentInputs] = useState({});
-
-const submitComment = async (postId) => {
-  const text = commentInputs[postId];
-  if (!text?.trim()) return;
-  const post = posts.find(p => p.id === postId);
-  const newComments = [...(post.comments || []), { userId: user.uid, text }];
-  await updateDoc(doc(db, "posts", postId), { comments: newComments });
-  setCommentInputs({ ...commentInputs, [postId]: "" });
-};
   const toggleLike = async (postId, likes) => {
     const liked = likes.includes(user.uid);
     await updateDoc(doc(db, "posts", postId), {
       likes: liked ? likes.filter(id => id !== user.uid) : [...likes, user.uid]
     });
+  };
+
+  const submitComment = async (postId) => {
+    const text = commentInputs[postId];
+    if (!text?.trim()) return;
+    const post = posts.find(p => p.id === postId);
+    const newComments = [...(post.comments || []), { userId: user.uid, text }];
+    await updateDoc(doc(db, "posts", postId), { comments: newComments });
+    setCommentInputs({ ...commentInputs, [postId]: "" });
   };
 
   const sendMessage = async () => {
@@ -224,26 +246,6 @@ const submitComment = async (postId) => {
       text: newMsg,
       createdAt: serverTimestamp()
     });
-
-    if (chatWith.fcmToken) {
-      await fetch("https://fcm.googleapis.com/v1/projects/elec-burkina/messages:send", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + chatWith.fcmToken
-        },
-        body: JSON.stringify({
-          message: {
-            token: chatWith.fcmToken,
-            notification: {
-              title: profile.name,
-              body: newMsg
-            }
-          }
-        })
-      });
-    }
-
     setNewMsg("");
   };
 
@@ -322,7 +324,6 @@ const submitComment = async (postId) => {
       </div>
 
       <div style={{ flex: 1, overflowY: "auto", paddingBottom: 70 }}>
-
         {activeTab === "feed" && (
           <div style={{ padding: 14 }}>
             <div style={S.card}>
@@ -382,18 +383,18 @@ const submitComment = async (postId) => {
                       ⚡ {(post.likes || []).length}
                     </button>
                     <button style={{ background: "none", border: "none", color: COLORS.muted, fontFamily: FONT, fontSize: 13, cursor: "pointer" }}>
-  💬 {(post.comments || []).length}
-</button>
-</div>
-{(post.comments || []).map((c, i) => (
-  <div key={i} style={{ background: "#1e2d4560", borderRadius: 10, padding: "8px 12px", marginTop: 8, fontSize: 13 }}>
-    <span style={{ fontWeight: 700, color: COLORS.accent }}>{users.find(u => u.id === c.userId)?.name} </span>
-    <span>{c.text}</span>
-  </div>
-))}
-<div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-  <input style={{ ...S.input, flex: 1, padding: "8px 12px", fontSize: 13 }} placeholder="Commenter..." value={commentInputs[post.id] || ""} onChange={e => setCommentInputs({ ...commentInputs, [post.id]: e.target.value })} onKeyDown={e => e.key === "Enter" && submitComment(post.id)} />
-  <button style={{ ...S.btn, padding: "8px 12px", fontSize: 12 }} onClick={() => submitComment(post.id)}>→</button>
+                      💬 {(post.comments || []).length}
+                    </button>
+                  </div>
+                  {(post.comments || []).map((c, i) => (
+                    <div key={i} style={{ background: "#1e2d4560", borderRadius: 10, padding: "8px 12px", marginTop: 8, fontSize: 13 }}>
+                      <span style={{ fontWeight: 700, color: COLORS.accent }}>{users.find(u => u.id === c.userId)?.name} </span>
+                      <span>{c.text}</span>
+                    </div>
+                  ))}
+                  <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+                    <input style={{ ...S.input, flex: 1, padding: "8px 12px", fontSize: 13 }} placeholder="Commenter..." value={commentInputs[post.id] || ""} onChange={e => setCommentInputs({ ...commentInputs, [post.id]: e.target.value })} onKeyDown={e => e.key === "Enter" && submitComment(post.id)} />
+                    <button style={{ ...S.btn, padding: "8px 12px", fontSize: 12 }} onClick={() => submitComment(post.id)}>→</button>
                   </div>
                 </div>
               );
@@ -417,7 +418,7 @@ const submitComment = async (postId) => {
           </div>
         )}
 
-        {activeTab === "messages" && !chatWith && (
+     {activeTab === "messages" && !chatWith && (
           <div style={{ padding: 14 }}>
             <h3 style={{ margin: "0 0 14px", fontSize: 16, fontWeight: 800 }}>Messages</h3>
             {approvedUsers.map(u => (
