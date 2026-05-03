@@ -36,8 +36,7 @@ jobs:
 
       - name: Install Capacitor 4
         run: |
-          npm install @capacitor/core@4 @capacitor/cli@4 @capacitor/android@4
-
+          npm install @capacitor/core@4 @capacitor/cli@4 @capacitor/android@4 @capacitor/push-notifications@4
       - name: Init Capacitor
         run: |
           rm -rf android
