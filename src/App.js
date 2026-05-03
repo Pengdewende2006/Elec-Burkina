@@ -68,15 +68,20 @@ export default function App() {
       const { Capacitor } = await import("@capacitor/core");
       if (!Capacitor.isNativePlatform()) return;
       const { PushNotifications } = await import("@capacitor/push-notifications");
-      const permission = await PushNotifications.requestPermissions();
-      if (permission.receive === "granted") {
-        await PushNotifications.register();
-      }
-      PushNotifications.addListener("registration", async (token) => {
-        await updateDoc(doc(db, "users", uid), { fcmToken: token.value });
-      });
-      PushNotifications.addListener("pushNotificationReceived", (notif) => {
-        showNotif(notif.title + " : " + notif.body);
+      await PushNotifications.requestPermissions().then(async (result) => {
+        if (result.receive === "granted") {
+          await PushNotifications.register();
+          PushNotifications.addListener("registration", async (token) => {
+            try {
+              await updateDoc(doc(db, "users", uid), { fcmToken: token.value });
+            } catch (e) {
+              console.log("Token save error:", e);
+            }
+          });
+          PushNotifications.addListener("pushNotificationReceived", (notif) => {
+            showNotif(notif.title + " : " + notif.body);
+          });
+        }
       });
     } catch (e) {
       console.log("Push error:", e);
