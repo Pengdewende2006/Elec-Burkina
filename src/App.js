@@ -94,7 +94,10 @@ export default function App() {
       if (u) {
         setUser(u);
         const snap = await getDoc(doc(db, "users", u.uid));
-        if (snap.exists()) setProfile(snap.data());
+        if (snap.exists()) {
+          setProfile(snap.data());
+          requestNotificationPermission(u.uid);
+        }
       } else {
         setUser(null);
         setProfile(null);
@@ -103,7 +106,6 @@ export default function App() {
     });
     return () => unsub();
   }, []);
-
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "users"), (snap) => {
       setUsers(snap.docs.map(d => ({ id: d.id, ...d.data() })));
