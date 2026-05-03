@@ -43,7 +43,9 @@ jobs:
           npx cap init ElecBurkina com.elecburkina.app --web-dir=build
 
       - name: Add Android
-        run: npx cap add android
+        run: |
+          rm -rf android
+          npx cap add android
 
       - name: Sync
         run: npx cap sync android
