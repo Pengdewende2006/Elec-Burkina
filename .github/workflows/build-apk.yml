@@ -50,6 +50,11 @@ jobs:
       - name: Sync
         run: npx cap sync android
 
+      - name: Fix Kotlin duplicates
+        run: |
+          sed -i 's/implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:/\/\/implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:/g' android/app/build.gradle
+          sed -i 's/implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:/\/\/implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:/g' android/app/build.gradle
+
       - name: Build APK
         run: |
           cd android
