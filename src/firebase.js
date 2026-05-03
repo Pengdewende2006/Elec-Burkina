@@ -17,16 +17,28 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const provider = new GoogleAuthProvider();
 export const db = getFirestore(app);
-export const messaging = getMessaging(app);
 
-export const requestNotificationPermission = async () => {
+let messaging = null;
+try {
+  messaging = getMessaging(app);
+} catch (e) {
+  console.log("Messaging non supporté");
+}
+export { messaging };
+
+export const requestNotificationPermission = async (userId) => {
   try {
-    const token = await getToken(messaging, {
-      vapidKey: "BHmmcaNGyuYMzpIh8p-fYhRd5Arn9c3ECzDdgyvFyiLh5GyygE1JBbfeSCVUIVhCkjN2BF-nedA2PfTU5m3ypqM"
-    });
-    if (token) {
-      console.log("Token notification:", token);
-      return token;
+    if (!messaging) return;
+    const permission = await Notification.requestPermission();
+    if (permission === "granted") {
+      const token = await getToken(messaging, {
+        vapidKey: "BHmmcaNGyuYMzpIh8p-fYhRd5Arn9c3ECzDdgyvFyiLh5GyygE1JBbfeSCVUIVhCkjN2BF-nedA2PfTU5m3ypqM"
+      });
+      if (token) {
+        const { doc, updateDoc } = await import("firebase/firestore");
+        await updateDoc(doc(db, "users", userId), { fcmToken: token });
+        console.log("Token sauvegardé !");
+      }
     }
   } catch (e) {
     console.log("Erreur notification:", e);
