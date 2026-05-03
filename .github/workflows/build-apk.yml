@@ -17,12 +17,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '18'
 
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: '17'
           distribution: 'temurin'
 
       - name: Setup Android SDK
@@ -34,26 +34,20 @@ jobs:
       - name: Build React app
         run: npm run build
 
-      - name: Install Capacitor
+      - name: Install Capacitor 4
         run: |
-          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npm install @capacitor/core@4 @capacitor/cli@4 @capacitor/android@4
 
       - name: Init Capacitor
         run: |
+          rm -rf android
           npx cap init ElecBurkina com.elecburkina.app --web-dir=build
 
       - name: Add Android
-        run: |
-          rm -rf android
-          npx cap add android
+        run: npx cap add android
 
       - name: Sync
         run: npx cap sync android
-
-      - name: Fix Kotlin duplicates
-        run: |
-          sed -i 's/implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:/\/\/implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:/g' android/app/build.gradle
-          sed -i 's/implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:/\/\/implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:/g' android/app/build.gradle
 
       - name: Build APK
         run: |
