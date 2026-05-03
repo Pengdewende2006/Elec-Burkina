@@ -224,6 +224,26 @@ const submitComment = async (postId) => {
       text: newMsg,
       createdAt: serverTimestamp()
     });
+
+    if (chatWith.fcmToken) {
+      await fetch("https://fcm.googleapis.com/v1/projects/elec-burkina/messages:send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + chatWith.fcmToken
+        },
+        body: JSON.stringify({
+          message: {
+            token: chatWith.fcmToken,
+            notification: {
+              title: profile.name,
+              body: newMsg
+            }
+          }
+        })
+      });
+    }
+
     setNewMsg("");
   };
 
