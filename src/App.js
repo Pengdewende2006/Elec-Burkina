@@ -64,6 +64,8 @@ export default function App() {
   };
 
   const initPushNotifications = async (uid) => {
+    return;
+  };
     try {
       const { Capacitor } = await import("@capacitor/core");
       if (!Capacitor.isNativePlatform()) return;
@@ -122,8 +124,8 @@ export default function App() {
         const snap = await getDoc(doc(db, "users", u.uid));
         if (snap.exists()) {
           setProfile(snap.data());
-          requestNotificationPermission(u.uid);
-          initPushNotifications(u.uid);
+          // requestNotificationPermission(u.uid);
+// initPushNotifications(u.uid);
         }
       } else {
         setUser(null);
