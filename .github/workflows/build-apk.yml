@@ -31,6 +31,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Install Capacitor packages
+        run: npm install @capacitor/core@4 @capacitor/cli@4 @capacitor/android@4 @capacitor/push-notifications@4
+
       - name: Build React app
         run: npm run build
 
