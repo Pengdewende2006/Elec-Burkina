@@ -119,23 +119,27 @@ export default function App() {
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (u) => {
-      if (u) {
-        setUser(u);
-        const snap = await getDoc(doc(db, "users", u.uid));
-        if (snap.exists()) {
-          setProfile(snap.data());
-          // requestNotificationPermission(u.uid);
-// initPushNotifications(u.uid);
+      try {
+        if (u) {
+          setUser(u);
+          const snap = await getDoc(doc(db, "users", u.uid));
+          if (snap.exists()) {
+            setProfile(snap.data());
+          }
+        } else {
+          setUser(null);
+          setProfile(null);
         }
-      } else {
+      } catch (e) {
+        console.log("Erreur auth:", e);
         setUser(null);
         setProfile(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     });
     return () => unsub();
   }, []);
-
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "users"), (snap) => {
       setUsers(snap.docs.map(d => ({ id: d.id, ...d.data() })));
