@@ -66,13 +66,6 @@ export default function App() {
   const initPushNotifications = async (uid) => {
     return;
   };
-    try {
-      const { Capacitor } = await import("@capacitor/core");
-      if (!Capacitor.isNativePlatform()) return;
-      const { PushNotifications } = await import("@capacitor/push-notifications");
-      await PushNotifications.requestPermissions().then(async (result) => {
-        if (result.receive === "granted") {
-          await PushNotifications.register();
           PushNotifications.addListener("registration", async (token) => {
             try {
               await updateDoc(doc(db, "users", uid), { fcmToken: token.value });
