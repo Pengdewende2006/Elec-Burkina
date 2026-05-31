@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { auth, provider, db, requestNotificationPermission } from "./firebase";
+import { auth, provider, db } from "./firebase";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -63,26 +63,6 @@ export default function App() {
     setTimeout(() => setNotification(null), 3000);
   };
 
-  const initPushNotifications = async (uid) => {
-    return;
-  };
-          PushNotifications.addListener("registration", async (token) => {
-            try {
-              await updateDoc(doc(db, "users", uid), { fcmToken: token.value });
-            } catch (e) {
-              console.log("Token save error:", e);
-            }
-          });
-          PushNotifications.addListener("pushNotificationReceived", (notif) => {
-            showNotif(notif.title + " : " + notif.body);
-          });
-        }
-      });
-    } catch (e) {
-      console.log("Push error:", e);
-    }
-  };
-
   const uploadImage = async (file) => {
     const formData = new FormData();
     formData.append("file", file);
@@ -133,6 +113,7 @@ export default function App() {
     });
     return () => unsub();
   }, []);
+
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "users"), (snap) => {
       setUsers(snap.docs.map(d => ({ id: d.id, ...d.data() })));
@@ -422,7 +403,7 @@ export default function App() {
           </div>
         )}
 
-     {activeTab === "messages" && !chatWith && (
+        {activeTab === "messages" && !chatWith && (
           <div style={{ padding: 14 }}>
             <h3 style={{ margin: "0 0 14px", fontSize: 16, fontWeight: 800 }}>Messages</h3>
             {approvedUsers.map(u => (
@@ -554,4 +535,4 @@ function Notif({ n }) {
       {n.msg}
     </div>
   );
-}
+              }
